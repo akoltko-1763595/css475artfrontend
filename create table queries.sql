@@ -1,131 +1,101 @@
 -- Artist Table
 CREATE TABLE Artist (
-  ArtistID int PRIMARY KEY,
+  ArtistID bigint PRIMARY KEY,
   Name varchar(150) NOT NULL,
   DOB date,
   Addl_Info varchar(MAX),
-  CONSTRAINT CHK_ID CHECK (ArtistID>=1000000000 AND ArtistID<=9999999999)
-  CONSTRAINT CHK_NAME CHECK (Name<>'')
+  CONSTRAINT CHK_ARTIST_ID CHECK (ArtistID>=1000000000 AND ArtistID<=9999999999),
+  CONSTRAINT CHK_ARTIST_NAME CHECK (Name<>'')
 )
 
-/*
---Good insert
-INSERT INTO Artist VALUES (1234567890, 'Pablo Picasso', '1776-07-04', 'pablo picasso was born on this date I think')
---Bad insert
-insert into Artist values (3,'Andrew Breton','1000-01-01','Pablo Picasso was born in 1000 AD, trust me')
-*/
-
--- Collector Table
+--Collector Table
 CREATE TABLE Collector (
-  CollectorID int PRIMARY KEY,
+  CollectorID bigint PRIMARY KEY,
   Name varchar(150) NOT NULL,
   DOB date,
-  CONSTRAINT CHK_ID CHECK (CollectorID>=1000000000 AND CollectorID<=9999999999)
-  CONSTRAINT CHK_NAME CHECK (Name<>'')
+  CONSTRAINT CHK_COLLECTOR_ID CHECK (CollectorID>=1000000000 AND CollectorID<=9999999999),
+  CONSTRAINT CHK_COLLECTOR_NAME CHECK (Name<>'')
 )
 
-/*
---Good insert
-INSERT INTO Collector VALUES (17, 'Scarlett Halima', '1800-12-02')
---Bad insert
-INSERT INTO Collector VALUES (1723456890, 'Taylor Eyler', '2020-01-25')
-*/
-
--- Venue Table
+--Venue Table
 CREATE TABLE Venue (
-  VenueID int NOT NULL,
+  VenueID bigint NOT NULL PRIMARY KEY,
   Name varchar (150) NOT NULL,
   Hours varchar(150),
   Location varchar(600) NOT NULL,
   Addl_Info varchar(MAX),
-  CONSTRAINT PK_Venue PRIMARY KEY (VenueID, Location)
-  CONSTRAINT CHK_NAME CHECK (Name<>'')
-  CONSTRAINT CHK_LOCATION CHECK (Location<>'')
+  CONSTRAINT CHK_VENUE_ID CHECK (VenueID>=1000000000 AND VenueID<=9999999999),
+  CONSTRAINT CHK_VENUE_NAME CHECK (Name<>''),
+  CONSTRAINT CHK_VENUE_LOCATION CHECK (Location<>'')
 )
 
-/*
---Good insert
-INSERT INTO Venue VALUES ('1234567890','Seattle Art Museum','9a to 5p mon-fri',
-                          '1300 1st Ave, Seattle, WA 98101',
-                          'Seattle''s most well-known museum')
---Bad insert
-INSERT INTO Venue VALUES ('1234567890','Seattle Art Museum','9a to 5p mon-fri',
-                          '','Seattle''s most well-known museum')
-*/
-
--- Exhibit Table
+--Exhibit Table
 CREATE TABLE Exhibit (
-  VenueID int FOREIGN KEY REFERENCES Venue(VenueID) NOT NULL,
-  Name varchar(150),
-  Description varchar(MAX),
-  StartDate date NOT NULL,
-  EndDate date NOT NULL,
-  CONSTRAINT PK_EXHIBIT PRIMARY KEY (VenueID, Name, StartDate)
+ Name varchar(150) NOT NULL,
+ Description varchar(MAX),
+ StartDate date,
+ EndDate date,
+ VenueID bigint FOREIGN KEY REFERENCES Venue(VenueID) NOT NULL,
+ CONSTRAINT PK_Exhibit PRIMARY KEY (VenueID, Name, StartDate),
+ CONSTRAINT CHK_EXHIBIT_NAME CHECK (Name<>''),
+ CONSTRAINT CHK_START_END_DATES CHECK (StartDate<=EndDate)
 )
 
-/*
---Good insert
-
---Bad insert
-
-*/
-
--- TABLENAME Table
+--Art Style Table
 CREATE TABLE Art_Style (
-
+ Name varchar(150) NOT NULL,
+ Period varchar(150) NOT NULL,
+ Addl_Info varchar(MAX),
+ CONSTRAINT PK_Art_Style PRIMARY KEY (Name, Period),
+ CONSTRAINT CHK_ART_STYLE_NAME CHECK (Name<>'')
 )
 
-/*
---Good insert
-
---Bad insert
-
-*/
-
--- TABLENAME Table
+--Artwork Table
 CREATE TABLE Artwork (
-
+  Title varchar(150) NOT NULL,
+  CreationDate date NOT NULL,
+  ArtworkValue int,
+  ArtistID bigint NOT NULL FOREIGN KEY REFERENCES Artist(ArtistID),
+  ArtworkSize varchar(MAX),
+  Material varchar(MAX),
+  Addl_Info varchar(MAX),
+  VenueID bigint  NOT NULL FOREIGN KEY REFERENCES Venue(VenueID),
+  StyleName varchar(150) NOT NULL,
+  Period varchar(150) NOT NULL,
+  CONSTRAINT PK_Artwork PRIMARY KEY (TItle, CreationDate, ArtistID),
+  CONSTRAINT CHK_TITLE CHECK (Title<>''),
+  CONSTRAINT CHK_VALUE CHECK (ArtworkValue is NULL or ArtworkValue>0),
+  CONSTRAINT CHK_ID CHECK (ArtistID>=1000000000 AND ArtistID<=9999999999),
+  CONSTRAINT CHK_ARTWORKSIZE CHECK (ArtworkSize<>''),
+  CONSTRAINT CHK_MATERIAL CHECK (Material<>''),
+  CONSTRAINT FK_ARTSTYLE FOREIGN KEY (StyleName, Period) REFERENCES   Art_Style(Name, Period)
 )
 
-/*
---Good insert
-
---Bad insert
-
-*/
-
--- TABLENAME Table
-CREATE TABLE Artwork_Creation (
-
+--Owners Table
+CREATE TABLE Owners (
+  OwnerID bigint PRIMARY KEY NOT NULL,
+  OwnerType varchar(9) NOT NULL,
+  CONSTRAINT CHK_TYPE CHECK (OwnerType in ('Collector', 'Artist', 'Venue'))
 )
 
-/*
---Good insert
-
---Bad insert
-
-*/
-
--- TABLENAME Table
+--Art Ownership Table
 CREATE TABLE Art_Ownership (
-
+  OwnerID bigint NOT NULL FOREIGN KEY REFERENCES Owners(OwnerID),
+  ArtTitle varchar(150) NOT NULL,
+  ArtCreationDate date NOT NULL,
+  ArtistID bigint NOT NULL,
+  CONSTRAINT FK_OWNERS FOREIGN KEY (ArtTitle, ArtCreationDate, ArtistID) REFERENCES Artwork(Title, CreationDate, ArtistID)
 )
 
-/*
---Good insert
-
---Bad insert
-
-*/
-
--- TABLENAME Table
+--Exhibit Contents Table
 CREATE TABLE Exhibit_Contents (
-
+ VenueID bigint NOT NULL,
+ Name varchar(150) NOT NULL,
+ StartDate Date NOT NULL,
+ Title varchar(150) NOT NULL,
+ CreationDate Date NOT NULL,
+ ArtistID bigint NOT NULL,
+ CONSTRAINT PK_Exhibit_Contents PRIMARY KEY (VenueID, Name, StartDate, Title, CreationDate, ArtistID),
+ CONSTRAINT FK_Exhibit FOREIGN KEY (VenueID, Name, StartDate) REFERENCES Exhibit(VenueID, Name, StartDate),
+ CONSTRAINT FK_Artwork FOREIGN KEY (Title, CreationDate, ArtistID) REFERENCES Artwork(Title, CreationDate, ArtistID)
 )
-
-/*
---Good insert
-
---Bad insert
-
-*/
