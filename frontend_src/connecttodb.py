@@ -13,11 +13,12 @@ with open('pw.txt','r') as pw:
 cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
 cursor = cnxn.cursor()
 
-#Sample select query
-cursor.execute("select 'hello'")
-row = cursor.fetchone()
-while row:
-    print(row[0])
+if __name__ == "__main__":
+    #Sample select query
+    cursor.execute("select 'hello'")
     row = cursor.fetchone()
+    while row:
+        print(row[0])
+        row = cursor.fetchone()
 
-cnxn.commit()
+    cnxn.commit()
