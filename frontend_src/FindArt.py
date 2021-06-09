@@ -8,6 +8,7 @@ class FindArtByName(Frame):
         self.form = Frame(self)
         self.answers = Frame(self)
         self.createform()
+        self.controller = controller
         Button(self, text="Go Home", command=lambda:controller.show_frame("Intro")
                ).grid(row=1, column=0)
 
@@ -32,33 +33,36 @@ class FindArtByName(Frame):
 
         resultframe = Frame(self.answers)
 
-        results = ttk.Treeview(resultframe, columns=('a','b','c'), selectmode=BROWSE)
+        resulttree = ttk.Treeview(resultframe, columns=('Title','Date','Artist'), selectmode=BROWSE)
 
 
-        sb = Scrollbar(resultframe, orient=VERTICAL, command=results.yview)
+        sb = Scrollbar(resultframe, orient=VERTICAL, command=resulttree.yview)
         sb.pack(side=RIGHT, fill=Y)
 
-        results.configure(yscrollcommand=sb.set)
+        resulttree.configure(yscrollcommand=sb.set)
 
         resultframe.grid(row=0, column=0)
 
-        results.column('#0', width=0, stretch=NO)
-        results.column('Title', anchor=E, minwidth=0, width=200)
-        results.column('Date', anchor=E, minwidth=0, width=200)
-        results.column('Artist', anchor=E, minwidth=0, width=200)
+        resulttree.column('#0', width=0, stretch=NO)
+        resulttree.column('Title', anchor=E, minwidth=0, width=200)
+        resulttree.column('Date', anchor=E, minwidth=0, width=200)
+        resulttree.column('Artist', anchor=E, minwidth=0, width=200)
 
-        results.heading('#0', text='', anchor=W)
-        results.heading('Title', text='Title', anchor=CENTER)
-        results.heading('Date', text='Date', anchor=CENTER)
-        results.heading('Artist', text='Artist', anchor=CENTER)
+        resulttree.heading('#0', text='', anchor=W)
+        resulttree.heading('Title', text='Title', anchor=CENTER)
+        resulttree.heading('Date', text='Date', anchor=CENTER)
+        resulttree.heading('Artist', text='Artist', anchor=CENTER)
 
-        #retrieve and parse results
-        results.insert(parent='',index=0, values=("Starry Night","2020-02-01","Andrew Koltko"))
-        results.insert(parent='',index=1, values=("Starry Night","2015-05-12","Pablo Picasso"))
-        results.insert(parent='',index=2, values=("Starry Night","2009-11-23","Vincent Van Gogh"))
-        results.insert(parent='',index=3, values=("Starry Night","1883-06-31","Yoko Ono"))
+        rownum = 0
+        querystr = "select title, creationdate, name from artwork w "
+        querystr += "join artist r on w.artistid=r.artistid"
+        querystr += f" where title like '%{self.ArtTitle.get()}%'"
+        results = self.controller.askdb.runQuery(querystr)
+        for row in results:
+            resulttree.insert(parent='',index=rownum, values=[i for i in row])
+            rownum += 1
 
-        results.pack(side=LEFT)
+        resulttree.pack(side=LEFT)
         self.answers.grid(row=1, column=0, sticky="nsew")
 
 class FindArtByArtist(Frame):
@@ -68,6 +72,7 @@ class FindArtByArtist(Frame):
         self.form = Frame(self)
         self.answers = Frame(self)
         self.createform()
+        self.controller = controller
         Button(self, text="Go Home", command=lambda:controller.show_frame("Intro")
                ).grid(row=1, column=0)
 
@@ -91,31 +96,35 @@ class FindArtByArtist(Frame):
 
         resultframe = Frame(self.answers)
 
-        results = ttk.Treeview(resultframe, columns=('a','b','c'), selectmode=BROWSE)
+        resulttree = ttk.Treeview(resultframe, columns=('Title','Date','Artist'), selectmode=BROWSE)
 
 
-        sb = Scrollbar(resultframe, orient=VERTICAL, command=results.yview)
+        sb = Scrollbar(resultframe, orient=VERTICAL, command=resulttree.yview)
         sb.pack(side=RIGHT, fill=Y)
 
-        results.configure(yscrollcommand=sb.set)
+        resulttree.configure(yscrollcommand=sb.set)
 
         resultframe.grid(row=0, column=0)
 
-        results.column('#0', width=0, stretch=NO)
-        results.column('Title', anchor=E, minwidth=0, width=200)
-        results.column('Date', anchor=E, minwidth=0, width=200)
-        results.column('Artist', anchor=E, minwidth=0, width=200)
+        resulttree.column('#0', width=0, stretch=NO)
+        resulttree.column('Title', anchor=E, minwidth=0, width=200)
+        resulttree.column('Date', anchor=E, minwidth=0, width=200)
+        resulttree.column('Artist', anchor=E, minwidth=0, width=200)
 
-        results.heading('#0', text='', anchor=W)
-        results.heading('Title', text='Title', anchor=CENTER)
-        results.heading('Date', text='Date', anchor=CENTER)
-        results.heading('Artist', text='Artist', anchor=CENTER)
+        resulttree.heading('#0', text='', anchor=W)
+        resulttree.heading('Title', text='Title', anchor=CENTER)
+        resulttree.heading('Date', text='Date', anchor=CENTER)
+        resulttree.heading('Artist', text='Artist', anchor=CENTER)
 
-        #Norman Rockwell
-        results.insert(parent='', index=0, values=("Freedom from Want","1943-01-01","Norman Rockwell"))
-        results.insert(parent='', index=1, values=("Freedom of Speech","1943-02-01","Norman Rockwell"))
-        results.insert(parent='', index=2, values=("Saying Grace","1951-01-01","Norman Rockwell"))
-        results.insert(parent='', index=3, values=("The Runaway","1958-01-01","Norman Rockwell"))
 
-        results.pack(side=LEFT)
+        rownum = 0
+        querystr = "select title, creationdate, name from artwork w "
+        querystr += "join artist r on w.artistid=r.artistid"
+        querystr += f" where name like '%{self.ArtistName.get()}%'"
+        results = self.controller.askdb.runQuery(querystr)
+        for row in results:
+            resulttree.insert(parent='',index=rownum, values=[i for i in row])
+            rownum += 1
+
+        resulttree.pack(side=LEFT)
         self.answers.grid(row=1, column=0, sticky="nsew")

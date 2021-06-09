@@ -1,5 +1,6 @@
 from tkinter import *
 import sys
+import pyodbc
 from PIL import ImageTk, Image
 import FindArt as art
 import FindExhibit as exh
@@ -17,28 +18,27 @@ class ArtFinder(Tk):
         # creating a container
         container = Frame(self)
         container.pack(side = "top", fill = "both", expand = True)
-
         container.grid_rowconfigure(0, weight = 1)
         container.grid_columnconfigure(0, weight = 1)
 
-        # initializing frames to an empty array
         self.frames = {}
-
-        # iterating through a tuple consisting
-        # of the different page layouts
         for F in (Intro, art.FindArtByName, art.FindArtByArtist,
                   exh.FindExhibitByName, exh.FindExhibitByMuseum,
                   artist.FindArtist):
-
             frame = F(container, self)
-
-            # initializing frame of that object from
-            # startpage, page1, page2 respectively with
-            # for loop
             self.frames[frame.name] = frame
 
         self.current_frame = "Intro"
         self.show_frame("Intro")
+
+        username = ''
+        password = ''
+        with open('pw.txt','r') as pw:
+            lines = pw.readlines()
+            username = lines[0].strip()
+            password = lines[1].strip()
+
+        self.askdb = askDatabase(username, password)
 
     # to display the current frame passed as
     # parameter
@@ -79,6 +79,28 @@ class Intro(Frame):
         Label(self, text="Looking for an Artist?").grid(row=5, column=0, columnspan=2, pady=5)
         Button(self, text="Find an Artist", command=lambda:controller.show_frame("FindArtist")
                ).grid(row=6, column=0, columnspan=2, pady=5)
+
+
+class askDatabase():
+    def __init__(self, u, p):
+        server = 'seattleart.cjhbuvf3dom6.us-west-2.rds.amazonaws.com,1433'
+        database = 'SeattleArt'
+        cnxnstr = 'DRIVER={ODBC Driver 17 for SQL Server};'
+        cnxnstr += 'SERVER='+server+';'
+        cnxnstr += 'DATABASE='+database+';'
+        cnxnstr += 'UID='+u+';PWD='+p+';'
+        self.cnxn = pyodbc.connect(cnxnstr)
+        self.cursor = self.cnxn.cursor()
+
+    def runQuery(self, query):
+        rows = self.cursor.execute(query).fetchall()
+        return rows
+
+    def runStatement(self, stmt):
+        self.cursor.execute(stmt)
+        self.cnxn.commit()
+
+
 
 
 if __name__ == '__main__':
