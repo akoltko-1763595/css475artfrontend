@@ -5,6 +5,7 @@ from PIL import ImageTk, Image
 import FindArt as art
 import FindExhibit as exh
 import FindArtist as artist
+import AdminActions as admin
 
 class ArtFinder(Tk):
     def __init__(self, *args, **kwargs):
@@ -16,24 +17,24 @@ class ArtFinder(Tk):
         self.title("Seattle Art Finder")
 
         # creating a container
-        container = Frame(self)
-        container.pack(side = "top", fill = "both", expand = True)
-        container.grid_rowconfigure(0, weight = 1)
-        container.grid_columnconfigure(0, weight = 1)
+        self.container = Frame(self)
+        self.container.pack(side = "top", fill = "both", expand = True)
+        self.container.grid_rowconfigure(0, weight = 1)
+        self.container.grid_columnconfigure(0, weight = 1)
 
         self.frames = {}
         for F in (Intro, art.FindArtByName, art.FindArtByArtist,
                   exh.FindExhibitByName, exh.FindExhibitByMuseum,
-                  artist.FindArtist):
-            frame = F(container, self)
-            self.frames[frame.name] = frame
+                  artist.FindArtist, admin.AdminPage):
+            frame = F(self.container, self)
+            self.frames[frame.name] = F
 
-        self.current_frame = "Intro"
+        self.current_frame = None
         self.show_frame("Intro")
 
         username = ''
         password = ''
-        with open('pw.txt','r') as pw:
+        with open('dbpw.txt','r') as pw:
             lines = pw.readlines()
             username = lines[0].strip()
             password = lines[1].strip()
@@ -43,9 +44,11 @@ class ArtFinder(Tk):
     # to display the current frame passed as
     # parameter
     def show_frame(self, cont):
-        self.frames[self.current_frame].grid_remove()
-        self.frames[cont].grid(row=0, column=0, sticky="nsew")
-        self.current_frame = cont
+        if self.current_frame is not None:
+            self.current_frame.grid_remove()
+            self.current_frame.destroy()
+        self.current_frame = self.frames[cont](self.container, self)
+        self.current_frame.grid(row=0, column=0, sticky="nsew")
 
 
 class Intro(Frame):
@@ -79,6 +82,8 @@ class Intro(Frame):
         Label(self, text="Looking for an Artist?").grid(row=5, column=0, columnspan=2, pady=5)
         Button(self, text="Find an Artist", command=lambda:controller.show_frame("FindArtist")
                ).grid(row=6, column=0, columnspan=2, pady=5)
+        Button(self, text="I'm an Editor", command=lambda:controller.show_frame("AdminPage")
+               ).grid(row=6, column=1, sticky=E, padx=5, pady=5)
 
 
 class askDatabase():
@@ -93,14 +98,20 @@ class askDatabase():
         self.cursor = self.cnxn.cursor()
 
     def runQuery(self, query):
-        rows = self.cursor.execute(query).fetchall()
-        return rows
+        try:
+            rows = self.cursor.execute(query).fetchall()
+            return rows
+        except:
+            print(query)
+            sys.exit(1)
 
     def runStatement(self, stmt):
-        self.cursor.execute(stmt)
-        self.cnxn.commit()
-
-
+        try:
+            self.cursor.execute(stmt)
+            self.cnxn.commit()
+        except:
+            print(stmt)
+            sys.exit(1)
 
 
 if __name__ == '__main__':

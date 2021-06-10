@@ -23,31 +23,26 @@ class FindArtByName(Frame):
         Button(self.form, text="search", command=self.getArt
                ).grid(row=0, column=2, padx=5, pady=5, sticky=W)
 
-        self.form.grid(row=0, column=0, sticky="nsew")
+        self.form.grid(row=0, column=0)
 
     def getArt(self):
         self.form.grid_remove()
-        #connect to backend here i guess?
+
         Label(self.answers, text=f"You searched for: {self.ArtTitle.get()}").grid(column=0, row=0)
-        self.answers.tkraise()
 
+        #need a subframe under answers for scrollbar to play nice
         resultframe = Frame(self.answers)
-
         resulttree = ttk.Treeview(resultframe, columns=('Title','Date','Artist'), selectmode=BROWSE)
-
 
         sb = Scrollbar(resultframe, orient=VERTICAL, command=resulttree.yview)
         sb.pack(side=RIGHT, fill=Y)
 
         resulttree.configure(yscrollcommand=sb.set)
-
         resultframe.grid(row=0, column=0)
-
         resulttree.column('#0', width=0, stretch=NO)
         resulttree.column('Title', anchor=E, minwidth=0, width=200)
         resulttree.column('Date', anchor=E, minwidth=0, width=200)
         resulttree.column('Artist', anchor=E, minwidth=0, width=200)
-
         resulttree.heading('#0', text='', anchor=W)
         resulttree.heading('Title', text='Title', anchor=CENTER)
         resulttree.heading('Date', text='Date', anchor=CENTER)
@@ -63,7 +58,7 @@ class FindArtByName(Frame):
             rownum += 1
 
         resulttree.pack(side=LEFT)
-        self.answers.grid(row=1, column=0, sticky="nsew")
+        self.answers.grid(row=0, column=0)
 
 class FindArtByArtist(Frame):
     def __init__(self, root, controller):
@@ -127,4 +122,4 @@ class FindArtByArtist(Frame):
             rownum += 1
 
         resulttree.pack(side=LEFT)
-        self.answers.grid(row=1, column=0, sticky="nsew")
+        self.answers.grid(row=0, column=0, sticky="nsew")

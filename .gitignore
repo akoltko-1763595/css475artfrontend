@@ -3,7 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# password file
+# internal and external password files
+dbpw.txt
+adminpw.json
 pw.txt
 
 # C extensions
