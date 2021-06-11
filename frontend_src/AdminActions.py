@@ -376,7 +376,7 @@ class AdminPage(Frame):
         Entry(artstyle, textvariable=addl_info
         ).grid(row=3, column=1, pady=5, sticky=W)
 
-        Button(artstyle, text="Add Art Style", command=lambda:addArtStyle(name, period, addl_info)
+        Button(artstyle, text="Add Art Style", command=lambda:self.addArtStyle(name, period, addl_info)
         ).grid(row=4, column=0, columnspan=2, padx=5, pady=5)
         return artstyle
 
